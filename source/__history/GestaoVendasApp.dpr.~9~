@@ -1,0 +1,43 @@
+program GestaoVendasApp;
+
+uses
+  Vcl.Forms,
+  vMain in 'view\vMain.pas' {fMain},
+  dConexao in 'dao\dConexao.pas' {dmConexao: TDataModule},
+  vCadastro in 'view\vCadastro.pas' {fCadastro},
+  hEdit in 'helper\hEdit.pas',
+  hComboBox in 'helper\hComboBox.pas',
+  uCalculos in 'unit\uCalculos.pas',
+  vAbastecimentos in 'view\vAbastecimentos.pas' {fAbastecimentos},
+  dAbastecimento in 'dao\dAbastecimento.pas' {dmAbastecimento: TDataModule},
+  mAbastecimento in 'model\mAbastecimento.pas',
+  cAbastecimento in 'controller\cAbastecimento.pas',
+  vRelatorio in 'view\vRelatorio.pas' {fRelatorio},
+  vRelAbastecimentos in 'view\vRelAbastecimentos.pas' {fRelAbastecimentos},
+  dReports in 'dao\dReports.pas' {dmReports: TDataModule},
+  rAbastecimentos in 'report\rAbastecimentos.pas' {fReportAbastecimentos},
+  uValidacoes in 'unit\uValidacoes.pas',
+  vSobre in 'view\vSobre.pas' {fSobre},
+  mProduto in 'model\mProduto.pas',
+  dProduto in 'dao\dProduto.pas' {dmProduto: TDataModule},
+  cProduto in 'controller\cProduto.pas',
+  vProdutos in 'view\vProdutos.pas' {fProdutos},
+  mCliente in 'model\mCliente.pas',
+  dCliente in 'dao\dCliente.pas' {dmCliente: TDataModule},
+  cCliente in 'controller\cCliente.pas',
+  vClientes in 'view\vClientes.pas' {fClientes};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfMain, fMain);
+  Application.CreateForm(TdmConexao, dmConexao);
+  Application.CreateForm(TfClientes, fClientes);
+  if dmConexao.Conexao.Connected then
+    Application.Run
+  else
+    Application.Terminate;
+
+end.

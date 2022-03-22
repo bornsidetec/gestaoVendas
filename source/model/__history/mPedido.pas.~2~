@@ -1,0 +1,24 @@
+unit mPedido;
+
+interface
+
+uses
+  System.SysUtils;
+
+type
+  TPedido = class
+  private
+    Fid: Integer;
+    FEmissao: TDateTime;
+    FCliente: Integer;
+    FValorTotal: Double;
+  public
+    property Id: Integer read Fid write Fid;
+    property Emissao: TDateTime read FEmissao write FEmissao;
+    property Cliente: Integer read FCliente write FCliente;
+    property ValorTotal: Double read FValorTotal write FValorTotal;
+  end;
+
+implementation
+
+end.

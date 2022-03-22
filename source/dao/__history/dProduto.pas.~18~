@@ -1,0 +1,136 @@
+unit dProduto;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+  Datasnap.DBClient, Datasnap.Provider, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, dConexao, mProduto;
+
+type
+  TdmProduto = class(TDataModule)
+    qryProduto: TFDQuery;
+    dspProduto: TDataSetProvider;
+    cdsProduto: TClientDataSet;
+    qryInserir: TFDQuery;
+    qryAlterar: TFDQuery;
+    qryExcluir: TFDQuery;
+    cdsProdutoId: TIntegerField;
+    cdsProdutoDescricao: TStringField;
+    cdsProdutoValorVenda: TFloatField;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    procedure Pesquisar(sDescricao: string);
+    procedure CarregarProduto(oProduto: TProduto; iId: Integer);
+    function Inserir(oProduto: TProduto; out sErro: string): Boolean;
+    function Alterar(oProduto: TProduto; out sErro: string): Boolean;
+    function Excluir(iId: Integer; out sErro: string): Boolean;
+  end;
+
+var
+  dmProduto: TdmProduto;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+{ TdmProduto }
+
+function TdmProduto.Alterar(oProduto: TProduto; out sErro: string): Boolean;
+begin
+
+  qryAlterar.Params[2].AsInteger := oProduto.Id;
+  qryAlterar.Params[0].AsString := oProduto.Descricao;
+  qryAlterar.Params[1].AsFloat := oProduto.ValorVenda;
+
+  try
+    qryAlterar.ExecSQL;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      sErro := 'Erro ao alterar Produtos: ' + sLineBreak + E.Message;
+      Result := False;
+    end;
+
+  end;
+
+end;
+
+procedure TdmProduto.CarregarProduto(oProduto: TProduto; iId: Integer);
+var
+  qryCarregaProduto: TFDQuery;
+begin
+
+  qryCarregaProduto := TFDQuery.Create(nil);
+  try
+    qryCarregaProduto.Connection := dmConexao.Conexao;
+    qryCarregaProduto.SQL.Add('SELECT * FROM Produtos WHERE Id = :id');
+    qryCarregaProduto.ParamByName('id').AsInteger := iId;
+    qryCarregaProduto.Open;
+
+    oProduto.Id := qryCarregaProduto.FieldByName('Id').AsInteger;
+    oProduto.Descricao := qryCarregaProduto.FieldByName('Descricao').AsString;
+    oProduto.ValorVenda := qryCarregaProduto.FieldByName('ValorVenda').AsFloat;
+  finally
+    FreeAndNil(qryCarregaProduto);
+  end;
+
+end;
+
+function TdmProduto.Excluir(iId: Integer; out sErro: string): Boolean;
+begin
+
+  qryExcluir.Params[0].AsInteger := iId;
+
+  try
+    qryExcluir.ExecSQL;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      sErro := 'Erro ao excluir Produtos: ' + sLineBreak + E.Message;
+      Result := False;
+    end;
+
+  end;
+
+end;
+
+function TdmProduto.Inserir(oProduto: TProduto; out sErro: string): Boolean;
+begin
+
+  qryInserir.Params[0].AsString := oProduto.Descricao;
+  qryInserir.Params[1].AsFloat := oProduto.ValorVenda;
+
+  try
+    qryInserir.ExecSQL;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      sErro := 'Erro ao inserir Produtos: ' + sLineBreak + E.Message;
+      Result := False;
+    end;
+
+  end;
+
+end;
+
+procedure TdmProduto.Pesquisar(sDescricao: string);
+begin
+  if cdsProduto.Active then
+    cdsProduto.Close;
+
+  cdsProduto.Params[0].AsString := '%' + sDescricao + '%';
+  cdsProduto.Open;
+  cdsProduto.First;
+end;
+
+end.

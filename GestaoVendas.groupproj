@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{71507C63-A3BF-4E3B-85D9-F0B54CA4EE78}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="source\GestaoVendasApp.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="source\test\GestaoVendasAppTests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="GestaoVendasApp">
+        <MSBuild Projects="source\GestaoVendasApp.dproj"/>
+    </Target>
+    <Target Name="GestaoVendasApp:Clean">
+        <MSBuild Projects="source\GestaoVendasApp.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GestaoVendasApp:Make">
+        <MSBuild Projects="source\GestaoVendasApp.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GestaoVendasAppTests">
+        <MSBuild Projects="source\test\GestaoVendasAppTests.dproj"/>
+    </Target>
+    <Target Name="GestaoVendasAppTests:Clean">
+        <MSBuild Projects="source\test\GestaoVendasAppTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GestaoVendasAppTests:Make">
+        <MSBuild Projects="source\test\GestaoVendasAppTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="GestaoVendasApp;GestaoVendasAppTests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="GestaoVendasApp:Clean;GestaoVendasAppTests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="GestaoVendasApp:Make;GestaoVendasAppTests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

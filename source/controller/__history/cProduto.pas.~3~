@@ -1,0 +1,20 @@
+unit cProduto;
+
+interface
+
+uses
+  mProduto, dProduto, System.SysUtils;
+
+type
+  TProdutoController = class
+  public
+    procedure Pesquisar(sDescricao: string);
+    procedure CarregarProduto(oProduto: TProduto; iId: Integer);
+    function Inserir(oProduto: TProduto; var sErro: string): Boolean;
+    function Alterar(oProduto: TProduto; var sErro: string): Boolean;
+    function Excluir(iId: Integer; var sErro: string): Boolean;
+  end;
+
+implementation
+
+end.
