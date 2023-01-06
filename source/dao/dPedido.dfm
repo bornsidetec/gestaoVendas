@@ -48,9 +48,9 @@ object dmPedidos: TdmPedidos
     Left = 32
     Top = 112
     object cdsPedidosId: TIntegerField
+      DisplayLabel = 'Pedido'
       FieldName = 'Id'
       Required = True
-      Visible = False
     end
     object cdsPedidosEmissao: TDateTimeField
       DisplayLabel = 'Emiss'#227'o'

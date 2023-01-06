@@ -11,7 +11,7 @@ uses
 
 type
   TTipoPesquisa = (tpHoje, tpTodos);
-  TAcao = (acInsere, acInsereProduto, acAlteraProduto, acLista);
+  TAcao = (acInsere, acInsereProduto, acAlteraProduto, acLista, acAltera);
 
   TfPedidos = class(TForm)
     ActionList: TActionList;
@@ -56,10 +56,19 @@ type
     actConfirmar: TAction;
     dsProdutos: TDataSource;
     actConcluir: TAction;
-    BitBtn1: TBitBtn;
+    btnConcluir: TBitBtn;
     pmProdutos: TPopupMenu;
     Excluir1: TMenuItem;
     btnCancelar: TBitBtn;
+    actPedido: TAction;
+    btnPedido: TBitBtn;
+    pnlCarregaPedido: TPanel;
+    edtPedido: TLabeledEdit;
+    actAlterar: TAction;
+    actVoltar: TAction;
+    btnAlterar: TBitBtn;
+    btnExcluir: TBitBtn;
+    btnVoltar: TBitBtn;
     procedure rbHojeClick(Sender: TObject);
     procedure actInserirExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -79,6 +88,14 @@ type
     procedure DBGrid2KeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure DBGrid1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure actPedidoExecute(Sender: TObject);
+    procedure cboClienteExit(Sender: TObject);
+    procedure actVoltarExecute(Sender: TObject);
+    procedure actAlterarExecute(Sender: TObject);
+    procedure actExcluirExecute(Sender: TObject);
+
   private
     { Private declarations }
     procedure Pesquisar(tp: TTipoPesquisa);
@@ -86,7 +103,7 @@ type
     procedure CarregarLista(cbLista: TComboBox);
 
     procedure Limpar;
-    procedure LimparProduto;
+    procedure LimparProduto(bFoco: Boolean = True);
     procedure LimparCalculos;
     procedure Validar(aAcao: TAcao);
     procedure Salvar;
@@ -100,8 +117,12 @@ type
     procedure PesquisarProduto;
     procedure CarregarProduto;
     procedure AlterarProduto;
+    procedure CarregarPedido(const iId: integer = 0);
     function BuscarProduto(iId: Integer; var sDescricao: string): Double;
     function TotalizarPedido(iIdPedido: Integer): Double;
+    function RetornaItem(sLista: TStrings; sParam: string): Integer;
+    procedure AcoesPedido(const bAcao: Boolean);
+    function PesquisarId(iId: integer): Boolean;
   public
     { Public declarations }
     FTipoPesquisa: TTipoPesquisa;
@@ -116,6 +137,38 @@ implementation
 
 {$R *.dfm}
 
+procedure TfPedidos.AcoesPedido(const bAcao: Boolean);
+begin
+  pnlCarregaPedido.Visible := bAcao;
+  pnlCarregaPedido.Top := 0;
+  pnlCarregaPedido.Left := 0;
+  edtPedido.Clear;
+
+  pnlGrid.Enabled := not bAcao;
+  pnlPedidos.Enabled := not bAcao;
+  pnlProdutos.Enabled := not bAcao;
+end;
+
+procedure TfPedidos.actAlterarExecute(Sender: TObject);
+begin
+
+  if edtPedido.Text = EmptyStr then
+  begin
+    MessageDlg('Pedido não informado.', mtConfirmation, [mbOk], 0);
+    Exit;
+  end;
+
+  if not PesquisarId(StrToIntDef(edtPedido.Text, 0)) then
+  begin
+    MessageDlg('Pedido não localizado.', mtConfirmation, [mbOk], 0);
+    Exit;
+  end;
+
+  AcoesPedido(False);
+  HabilitarAcoes(acAltera);
+  CarregarPedido(StrToIntDef(edtPedido.Text, 0));
+end;
+
 procedure TfPedidos.actCancelarExecute(Sender: TObject);
 begin
   HabilitarAcoes(acLista);
@@ -126,6 +179,7 @@ begin
   Validar(acLista);
   HabilitarAcoes(acLista);
   Alterar;
+
   Pesquisar(tpHoje);
 end;
 
@@ -147,6 +201,29 @@ begin
 
 end;
 
+procedure TfPedidos.actExcluirExecute(Sender: TObject);
+begin
+
+  if edtPedido.Text = EmptyStr then
+  begin
+    MessageDlg('Pedido não informado.', mtConfirmation, [mbOk], 0);
+    Exit;
+  end;
+
+  if not PesquisarId(StrToIntDef(edtPedido.Text, 0)) then
+  begin
+    MessageDlg('Pedido não localizado.', mtConfirmation, [mbOk], 0);
+    Exit;
+  end;
+
+  iIdPedido := StrToIntDef(edtPedido.Text, 0);
+  Excluir;
+  AcoesPedido(False);
+  HabilitarAcoes(acLista);
+  Pesquisar(tpHoje);
+
+end;
+
 procedure TfPedidos.actFecharExecute(Sender: TObject);
 begin
   Close;
@@ -159,11 +236,21 @@ begin
   Limpar;
 end;
 
+procedure TfPedidos.actPedidoExecute(Sender: TObject);
+begin
+  AcoesPedido(True);
+end;
+
 procedure TfPedidos.actSalvarExecute(Sender: TObject);
 begin
   Validar(acInsere);
   Salvar;
   HabilitarAcoes(acInsereProduto);
+end;
+
+procedure TfPedidos.actVoltarExecute(Sender: TObject);
+begin
+  AcoesPedido(False);
 end;
 
 procedure TfPedidos.Alterar;
@@ -273,6 +360,38 @@ begin
 
 end;
 
+procedure TfPedidos.CarregarPedido(const iId: integer = 0);
+var
+  oPedido: TPedido;
+  oPedidoController: TPedidoController;
+  iIdPed: integer;
+
+begin
+
+  oPedido := TPedido.Create;
+  oPedidoController := TPedidoController.Create;
+
+  try
+    iIdPed := iId;
+    if iId = 0 then
+      iIdPed := dmPedidos.cdsPedidosId.AsInteger;
+
+    oPedidoController.CarregarPedido(oPedido, iIdPed);
+    iIdPedido := oPedido.Id;
+    cboCliente.ItemIndex := RetornaItem(cboCliente.Items, oPedido.ClienteNome);
+
+    PesquisarProduto;
+
+    edtTotalPedido.Text :=
+      FormatFloat('#0.00', TotalizarPedido(iIdPedido));
+
+  finally
+    FreeAndNil(oPedido);
+    FreeAndNil(oPedidoController);
+  end;
+
+end;
+
 procedure TfPedidos.CarregarProduto;
 var
   oPedidoProduto: TPedidoProduto;
@@ -294,6 +413,21 @@ begin
     FreeAndNil(oPedidoProduto);
   end;
 
+end;
+
+procedure TfPedidos.cboClienteExit(Sender: TObject);
+begin
+  btnPedido.Enabled := cboCliente.ItemIndex = -1
+end;
+
+procedure TfPedidos.DBGrid1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = VK_RETURN then
+  begin
+    HabilitarAcoes(acAltera);
+    CarregarPedido;
+  end;
 end;
 
 procedure TfPedidos.DBGrid2KeyDown(Sender: TObject; var Key: Word;
@@ -318,13 +452,14 @@ begin
   if edtIdProduto.Text <> EmptyStr then
   begin
 
-    if edtValor.Text = '' then
       edtValor.Text :=
         FormatFloat('#0.00', BuscarProduto(StrToInt(edtIdProduto.Text), s));
 
-    if edtProduto.Text = '' then
       edtProduto.Text := s;
-  end;
+  end
+  else
+    LimparProduto(False);
+
 end;
 
 procedure TfPedidos.edtIdProdutoKeyPress(Sender: TObject; var Key: Char);
@@ -335,14 +470,17 @@ end;
 
 procedure TfPedidos.edtQuantidadeExit(Sender: TObject);
 begin
+  if edtQuantidade.Text = EmptyStr then
+    edtQuantidade.Text := '1';
+
   if (edtQuantidade.Text <> EmptyStr) or
     (edtValor.Text <> EmptyStr) then
 
     edtTotalProduto.Text :=
       FormatFloat('#0.00',
         uCalculos.TCalculos.Valor(
-        StrToInt(edtQuantidade.Text),
-        StrToFloat(edtValor.Text)));
+        StrToIntDef(edtQuantidade.Text, 0),
+        StrToFloatDef(edtValor.Text, 0)));
 end;
 
 procedure TfPedidos.Excluir;
@@ -438,6 +576,8 @@ end;
 procedure TfPedidos.HabilitarAcoes(aAcao: TAcao);
 begin
 
+  pnlCarregaPedido.Visible := False;
+
   case aAcao of
     acInsere:
       begin
@@ -449,8 +589,9 @@ begin
         CarregarLista(cboCliente);
         Limpar;
         btnCancelar.Enabled := True;
+        btnPedido.Enabled := True;
       end;
-    acInsereProduto, acAlteraProduto:
+    acInsereProduto, acAlteraProduto, acAltera:
       begin
         PageControl.ActivePage := tsProdutos;
         btnFechar.Enabled := False;
@@ -465,9 +606,13 @@ begin
         edtQuantidade.Text := '1';
         edtIdProduto.ReadOnly := aAcao = acAlteraProduto;
         if aAcao = acAlteraProduto then
-          begin
+        begin
             btnConfirmar.Tag := 1;
-          end;
+        end;
+        if aAcao = acAltera then
+        begin
+          CarregarLista(cboCliente);
+        end;
       end;
     acLista:
       begin
@@ -478,6 +623,7 @@ begin
         btnInserir.Enabled := True;
         btnSalvar.Enabled := False;
         btnCancelar.Enabled := False;
+        rbHoje.Checked := True;
       end;
   end;
 
@@ -548,14 +694,15 @@ begin
   edtTotalPedido.Clear;
 end;
 
-procedure TfPedidos.LimparProduto;
+procedure TfPedidos.LimparProduto(bFoco: Boolean = True);
 begin
   edtIdProduto.Clear;
   edtProduto.Clear;
   edtValor.Clear;
   edtQuantidade.Clear;
   edtTotalProduto.Clear;
-  edtIdProduto.SetFocus;
+  if bFoco then
+    edtIdProduto.SetFocus;
 end;
 
 procedure TfPedidos.PesquisarProduto;
@@ -579,10 +726,33 @@ begin
   try
     case tp of
       tpHoje:
+      begin
         oPedidoController.Pesquisar(date);
+        rbHoje.Checked;
+      end;
       tpTodos:
+      begin
         oPedidoController.Pesquisar(0);
+        rbTodos.Checked;
+      end;
     end;
+  finally
+    FreeAndNil(oPedidoController);
+  end;
+
+end;
+
+function TfPedidos.PesquisarId(iId: integer): Boolean;
+var
+  oPedidoController: TPedidoController;
+  bEmpty: Boolean;
+begin
+
+  oPedidoController := TPedidoController.Create;
+  try
+    oPedidoController.Pesquisar(iId, bEmpty);
+    Result := not bEmpty
+
   finally
     FreeAndNil(oPedidoController);
   end;
@@ -597,6 +767,19 @@ begin
     FTipoPesquisa := tpTodos;
 
   Pesquisar(FTipoPesquisa);
+end;
+
+function TfPedidos.RetornaItem(sLista: TStrings; sParam: string): Integer;
+var
+  i: Integer;
+begin
+
+  for i := 0 to sLista.Count - 1 do
+  begin
+    if pos(sParam, sLista[i]) > 0 then
+      Result := i;
+  end;
+
 end;
 
 procedure TfPedidos.Salvar;

@@ -38,7 +38,8 @@ type
     { Public declarations }
     iIdPedido: Integer;
     function GerarId: Integer;
-    procedure Pesquisar(dData: TDateTime);
+    procedure Pesquisar(dData: TDateTime); overload;
+    procedure Pesquisar(iId: Integer; out bEmpty: Boolean); overload;
     procedure CarregarPedido(oPedido: TPedido; iId: Integer);
     function Inserir(oPedido: TPedido; out sErro: string): Boolean;
     function Alterar(oPedido: TPedido; out sErro: string): Boolean;
@@ -190,14 +191,20 @@ end;
 function TdmPedidos.Excluir(iId: Integer; out sErro: string): Boolean;
 begin
 
+  query.SQL.Clear;
+  query.SQL.Text :=
+    ' DELETE FROM Pedido_Produtos WHERE Pedido = :Id; ';
+  query.Params[0].AsInteger := iId;
+
   qryExcluir.SQL.Clear;
   qryExcluir.SQL.Text :=
-    ' DELETE FROM Pedidos WHERE Id = :Id ';
+    ' DELETE FROM Pedidos WHERE Id = :Id; ';
   qryExcluir.Params[0].AsInteger := iId;
 
   dmConexao.Conexao.StartTransaction;
 
   try
+    query.ExecSQL;
     qryExcluir.ExecSQL;
     dmConexao.Conexao.Commit;
     Result := True;
@@ -347,6 +354,20 @@ begin
 
   cdsPedidos.Open;
   cdsPedidos.First;
+
+end;
+
+procedure TdmPedidos.Pesquisar(iId: Integer; out bEmpty: Boolean);
+begin
+
+  query.SQL.Clear;
+  query.SQL.Text :=
+    ' SELECT Pedidos.Id FROM Pedidos ' +
+    ' WHERE Pedidos.Id = :Id ';
+  query.ParamByName('Id').AsInteger := iId;
+  query.Open;
+
+  bEmpty := query.IsEmpty;
 
 end;
 

@@ -7,7 +7,8 @@ uses dPedido, mPedido;
 type
   TPedidoController = class
   public
-    procedure Pesquisar(dData: TDateTime);
+    procedure Pesquisar(dData: TDateTime); overload;
+    procedure Pesquisar(iId: Integer; out bEmpty: Boolean); overload;
     procedure CarregarPedido(oPedido: TPedido; iId: Integer);
     function Inserir(oPedido: TPedido; var sErro: string): Boolean;
     function Alterar(oPedido: TPedido; var sErro: string): Boolean;
@@ -53,6 +54,11 @@ end;
 procedure TPedidoController.ListarClientes;
 begin
   dmPedidos.ListarClientes;
+end;
+
+procedure TPedidoController.Pesquisar(iId: Integer; out bEmpty: Boolean);
+begin
+  dmPedidos.Pesquisar(iId, bEmpty);
 end;
 
 procedure TPedidoController.Pesquisar(dData: TDateTime);
