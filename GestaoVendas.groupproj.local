@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2022/03/16 02:00:00.000.381,C:\Users\borns\Documents\Embarcadero\Studio\Projects\ProjectGroup1.groupproj=D:\Dados\BRUNO\Documentos\vagas\wk\GestaoVendasApp.groupproj</Transaction>
+    <Transaction>2022/03/16 02:00:00.000.381,D:\Dados\BRUNO\Documentos\vagas\wk\GestaoVendasApp.groupproj=C:\Users\borns\Documents\Embarcadero\Studio\Projects\ProjectGroup1.groupproj</Transaction>
   </Transactions>
 	<Default.Personality>
-		<Projects ActiveProject="C:\Users\borns\Google Drive\bornside\_WK\citel\fontes\gestaoVendas\source\GestaoVendasApp.dproj"/>
+		<Projects ActiveProject="G:\Meu Drive\bornside\repositorio\gestaoVendas\source\GestaoVendasApp.dproj"/>
 	</Default.Personality>
 </BorlandProject>
