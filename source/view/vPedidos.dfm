@@ -375,7 +375,7 @@ object fPedidos: TfPedidos
           TabOrder = 2
         end
         object btnPedido: TBitBtn
-          Left = 385
+          Left = 387
           Top = 21
           Width = 79
           Height = 33
@@ -411,7 +411,7 @@ object fPedidos: TfPedidos
           OnKeyPress = edtIdProdutoKeyPress
         end
         object btnAlterar: TBitBtn
-          Left = 385
+          Left = 387
           Top = 21
           Width = 79
           Height = 33
@@ -433,7 +433,7 @@ object fPedidos: TfPedidos
           TabOrder = 2
         end
         object btnVoltar: TBitBtn
-          Left = 550
+          Left = 553
           Top = 21
           Width = 79
           Height = 33
