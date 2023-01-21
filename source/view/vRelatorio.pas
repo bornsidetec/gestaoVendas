@@ -40,7 +40,7 @@ end;
 procedure TfRelatorio.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  Self := nil;
+  fRelatorio := nil;
 end;
 
 end.

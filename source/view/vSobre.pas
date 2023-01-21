@@ -40,7 +40,7 @@ implementation
 procedure TfSobre.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  Self := nil;
+  fSobre := nil;
 end;
 
 procedure TfSobre.lblCaminhoGitClick(Sender: TObject);

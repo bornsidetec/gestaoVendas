@@ -11,6 +11,7 @@ type
     class procedure KeyPress(var Key: Char; sTexto: string;
       iLocal, iTamanho, iCasas: Integer);
   end;
+
   TMaskEditHelper = class helper for TMaskEdit
   public
     class procedure Agora(var Key: Char; var edt: TMaskEdit);
@@ -27,10 +28,11 @@ var
   iVirgula: Integer;
 begin
 
-  if not(Key in ['0' .. '9', ',', #8, #9]) then
+  if not(CharInSet(Key, ['0' .. '9', ',', #8, #9])) then
     Key := #0;
 
-  if Key in ['0' .. '9', ','] then
+  if CharInSet(Key, ['0' .. '9', ',']) then
+
   begin
 
     iVirgula := Pos(',', sTexto);
@@ -58,12 +60,9 @@ begin
     end
     else
     begin
-
       if (Length(sTexto) = iTamanho) and (Key <> ',') then
         Key := #0;
-
     end;
-
   end;
 
 end;
@@ -72,10 +71,12 @@ end;
 
 class procedure TMaskEditHelper.Agora(var Key: Char; var edt: TMaskEdit);
 begin
-  if (Key in ['a','A',#8]) then
+
+  if CharInSet(Key, ['a','A',#8]) then
     edt.Text := FormatDateTime('DD/MM/YYYY HH:MM', now)
   else
     Key := #0;
+
 end;
 
 end.

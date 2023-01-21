@@ -1,7 +1,7 @@
 program GestaoVendasApp;
 
 uses
-  Vcl.Forms,
+  Vcl.Forms, MidasLib,
   vMain in 'view\vMain.pas' {fMain},
   dConexao in 'dao\dConexao.pas' {dmConexao: TDataModule},
   vCadastro in 'view\vCadastro.pas' {fCadastro},

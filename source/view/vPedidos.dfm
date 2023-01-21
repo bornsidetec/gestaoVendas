@@ -52,7 +52,7 @@ object fPedidos: TfPedidos
       645
       45)
     object btnFechar: TBitBtn
-      Left = 553
+      Left = 555
       Top = 7
       Width = 81
       Height = 33
@@ -146,12 +146,13 @@ object fPedidos: TfPedidos
       TabVisible = False
       object pnlProdutos: TPanel
         Left = 0
-        Top = 65
+        Top = 136
         Width = 637
         Height = 72
         Align = alTop
-        TabOrder = 1
+        TabOrder = 2
         Visible = False
+        ExplicitTop = 65
         DesignSize = (
           637
           72)
@@ -202,6 +203,7 @@ object fPedidos: TfPedidos
           Color = clWhite
           TabOrder = 3
           OnExit = edtQuantidadeExit
+          OnKeyPress = edtValorKeyPress
         end
         object edtQuantidade: TEdit
           Left = 264
@@ -254,14 +256,14 @@ object fPedidos: TfPedidos
       end
       object pnlGrid: TPanel
         Left = 0
-        Top = 137
+        Top = 208
         Width = 637
-        Height = 232
+        Height = 161
         Align = alClient
-        TabOrder = 2
+        TabOrder = 3
         object pnlTotal: TPanel
           Left = 1
-          Top = 171
+          Top = 100
           Width = 635
           Height = 60
           Align = alBottom
@@ -311,7 +313,7 @@ object fPedidos: TfPedidos
           Left = 1
           Top = 1
           Width = 635
-          Height = 170
+          Height = 99
           Align = alClient
           DataSource = dsProdutos
           Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
@@ -328,11 +330,12 @@ object fPedidos: TfPedidos
       end
       object pnlPedidos: TPanel
         Left = 0
-        Top = 0
+        Top = 71
         Width = 637
         Height = 65
         Align = alTop
-        TabOrder = 0
+        TabOrder = 1
+        ExplicitTop = 0
         DesignSize = (
           637
           65)
@@ -388,13 +391,15 @@ object fPedidos: TfPedidos
       end
       object pnlCarregaPedido: TPanel
         Left = 0
-        Top = 231
+        Top = 0
         Width = 637
         Height = 71
+        Align = alTop
         Color = cl3DLight
         ParentBackground = False
-        TabOrder = 3
+        TabOrder = 0
         Visible = False
+        ExplicitLeft = -3
         DesignSize = (
           637
           71)

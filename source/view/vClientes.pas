@@ -3,7 +3,8 @@ unit vClientes;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, System.UITypes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, vCadastro, Data.DB, System.ImageList,
   Vcl.ImgList, System.Actions, Vcl.ActnList, Vcl.Grids, Vcl.DBGrids,
   Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Buttons, Vcl.ExtCtrls,
@@ -172,7 +173,6 @@ begin
     FreeAndNil(oClienteController);
   end;
 
-
 end;
 
 procedure TfClientes.FormCreate(Sender: TObject);
@@ -274,10 +274,15 @@ var
   i: Integer;
 begin
 
+  Result := -1;
+
   for i := 0 to sLista.Count - 1 do
   begin
     if pos(sParam, sLista[i]) > 0 then
+    begin
       Result := i;
+      Break;
+    end;
   end;
 
 end;

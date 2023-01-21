@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  System.Classes, Vcl.Graphics, System.UITypes,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls,
   System.Actions, Vcl.ActnList, Vcl.StdCtrls, Vcl.Buttons, System.ImageList,
   Vcl.ImgList, Data.DB, Vcl.Grids, Vcl.DBGrids;
@@ -59,8 +59,6 @@ type
   private
     { Private declarations }
     procedure Mostrar;
-    procedure Insere;
-    procedure Altera;
     procedure Detalha;
     procedure HabilitarAcoes(aAcao: TAcao);
     procedure Listar;
@@ -129,12 +127,6 @@ begin
   Listar;
 end;
 
-procedure TfCadastro.Altera;
-begin
-  FAcao := acAltera;
-  PageControl.ActivePage := tsDetalhes;
-end;
-
 procedure TfCadastro.Detalha;
 begin
   FAcao := acLista;
@@ -145,7 +137,7 @@ end;
 procedure TfCadastro.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  Self := nil;
+  fCadastro := nil;
 end;
 
 procedure TfCadastro.FormShow(Sender: TObject);
@@ -173,12 +165,6 @@ begin
         btnCancelar.Enabled := false;
       end;
   end;
-end;
-
-procedure TfCadastro.Insere;
-begin
-  FAcao := acInsere;
-  PageControl.ActivePage := tsDetalhes;
 end;
 
 procedure TfCadastro.Listar;

@@ -3,11 +3,13 @@ unit vPedidos;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, System.UITypes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, System.ImageList, Vcl.ImgList,
   System.Actions, Vcl.ActnList, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls,
   Vcl.ComCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids, Vcl.DBCtrls, Vcl.Mask,
-  dPedido, cPedido, mPedido, hComboBox, hEdit, uCalculos, Vcl.Menus;
+  dPedido, cPedido, mPedido, hComboBox, hEdit, uCalculos, Vcl.Menus,
+  FireDAC.Stan.Param;
 
 type
   TTipoPesquisa = (tpHoje, tpTodos);
@@ -95,6 +97,7 @@ type
     procedure actVoltarExecute(Sender: TObject);
     procedure actAlterarExecute(Sender: TObject);
     procedure actExcluirExecute(Sender: TObject);
+    procedure edtValorKeyPress(Sender: TObject; var Key: Char);
 
   private
     { Private declarations }
@@ -140,13 +143,14 @@ implementation
 procedure TfPedidos.AcoesPedido(const bAcao: Boolean);
 begin
   pnlCarregaPedido.Visible := bAcao;
-  pnlCarregaPedido.Top := 0;
-  pnlCarregaPedido.Left := 0;
   edtPedido.Clear;
 
-  pnlGrid.Enabled := not bAcao;
-  pnlPedidos.Enabled := not bAcao;
-  pnlProdutos.Enabled := not bAcao;
+  pnlPedidos.Visible := not bAcao;
+  pnlProdutos.Visible := not bAcao;
+  pnlGrid.Visible := not bAcao;
+
+  if bAcao then
+    edtPedido.SetFocus;
 end;
 
 procedure TfPedidos.actAlterarExecute(Sender: TObject);
@@ -318,8 +322,8 @@ begin
   dmPedidos.query.Close;
   dmPedidos.query.SQL.Clear;
   dmPedidos.query.SQL.Text :=
-    ' SELECT Id, Descricao, ValorVenda FROM produtos WHERE Id = :id ';
-  dmPedidos.query.ParamByName('id').AsInteger := iId;
+    ' SELECT Id, Descricao, ValorVenda FROM produtos WHERE Id = :idProduto ';
+  dmPedidos.query.ParamByName('idProduto').AsInteger := iId;
   dmPedidos.query.Open;
 
   if dmPedidos.query.IsEmpty then
@@ -447,15 +451,14 @@ end;
 procedure TfPedidos.edtIdProdutoExit(Sender: TObject);
 var
   s: string;
-  d: Double;
 begin
   if edtIdProduto.Text <> EmptyStr then
   begin
 
-      edtValor.Text :=
-        FormatFloat('#0.00', BuscarProduto(StrToInt(edtIdProduto.Text), s));
+    edtValor.Text :=
+      FormatFloat('#0.00', BuscarProduto(StrToInt(edtIdProduto.Text), s));
 
-      edtProduto.Text := s;
+    edtProduto.Text := s;
   end
   else
     LimparProduto(False);
@@ -464,7 +467,7 @@ end;
 
 procedure TfPedidos.edtIdProdutoKeyPress(Sender: TObject; var Key: Char);
 begin
-  if not(Key in ['0' .. '9', #8, #9]) then
+  if not CharInSet(Key, ['0' .. '9', #8, #9]) then
     Key := #0;
 end;
 
@@ -481,6 +484,11 @@ begin
         uCalculos.TCalculos.Valor(
         StrToIntDef(edtQuantidade.Text, 0),
         StrToFloatDef(edtValor.Text, 0)));
+end;
+
+procedure TfPedidos.edtValorKeyPress(Sender: TObject; var Key: Char);
+begin
+  edtValor.KeyPress(Key, edtValor.Text, edtValor.SelStart, 7, 2);
 end;
 
 procedure TfPedidos.Excluir;
@@ -543,7 +551,7 @@ end;
 procedure TfPedidos.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  Self := nil;
+  fPedidos := nil;
 end;
 
 procedure TfPedidos.FormCreate(Sender: TObject);
@@ -579,40 +587,37 @@ begin
   pnlCarregaPedido.Visible := False;
 
   case aAcao of
-    acInsere:
+    acInsere, acInsereProduto, acAlteraProduto, acAltera:
       begin
         PageControl.ActivePage := tsProdutos;
         btnFechar.Enabled := False;
         btnInserir.Enabled := False;
-        btnSalvar.Enabled := True;
-        cboCliente.Enabled := True;
-        CarregarLista(cboCliente);
-        Limpar;
-        btnCancelar.Enabled := True;
-        btnPedido.Enabled := True;
-      end;
-    acInsereProduto, acAlteraProduto, acAltera:
-      begin
-        PageControl.ActivePage := tsProdutos;
-        btnFechar.Enabled := False;
-        btnInserir.Enabled := False;
-        btnSalvar.Enabled := False;
-        btnCancelar.Enabled := False;
-        pnlProdutos.Visible := True;
-        pnlTotal.Visible := True;
-        btnConfirmar.Enabled := True;
-        cboCliente.Enabled := False;
-        LimparProduto;
-        edtQuantidade.Text := '1';
-        edtIdProduto.ReadOnly := aAcao = acAlteraProduto;
-        if aAcao = acAlteraProduto then
+
+        if aAcao = acInsere then
         begin
-            btnConfirmar.Tag := 1;
-        end;
-        if aAcao = acAltera then
-        begin
+          btnSalvar.Enabled := True;
+          cboCliente.Enabled := True;
           CarregarLista(cboCliente);
+          Limpar;
+          btnCancelar.Enabled := True;
+          btnPedido.Enabled := True;
+        end
+        else
+        begin
+          btnSalvar.Enabled := False;
+          btnCancelar.Enabled := False;
+          pnlProdutos.Visible := True;
+          pnlTotal.Visible := True;
+          btnConfirmar.Enabled := True;
+          cboCliente.Enabled := False;
+          LimparProduto;
+          edtQuantidade.Text := '1';
+          edtIdProduto.ReadOnly := aAcao = acAlteraProduto;
         end;
+        if aAcao = acAlteraProduto then
+          btnConfirmar.Tag := 1
+        else if aAcao = acAltera then
+          CarregarLista(cboCliente);
       end;
     acLista:
       begin
@@ -774,10 +779,15 @@ var
   i: Integer;
 begin
 
+  Result := -1;
+
   for i := 0 to sLista.Count - 1 do
   begin
     if pos(sParam, sLista[i]) > 0 then
+    begin
       Result := i;
+      Break;
+    end;
   end;
 
 end;
@@ -803,17 +813,14 @@ end;
 
 function TfPedidos.TotalizarPedido(iIdPedido: Integer): Double;
 begin
-  with dmPedidos.query do
-  begin
-    Close;
-    SQL.Clear;
-    SQL.Text :=
-      ' SELECT SUM(ValorTotal) as Total FROM pedido_produtos WHERE pedido = :idPedido ';
-    ParamByName('idPedido').AsInteger := iIdPedido;
-    Open;
+  dmPedidos.query.Close;
+  dmPedidos.query.SQL.Clear;
+  dmPedidos.query.SQL.Text :=
+    ' SELECT SUM(ValorTotal) as Total FROM pedido_produtos WHERE pedido = :id ';
+  dmPedidos.query.ParamByName('id').AsInteger := iIdPedido;
+  dmPedidos.query.Open;
 
-    Result := FieldByName('Total').AsFloat;
-  end;
+  Result := dmPedidos.query.FieldByName('Total').AsFloat;
 end;
 
 procedure TfPedidos.Validar(aAcao: TAcao);
